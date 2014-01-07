@@ -1,0 +1,71 @@
+<h1>All Users</h1>
+
+<ul>
+  <% User.all.each do |user| %>
+  <li>
+    <%= user.username %>
+    <% next if !can_friend?(user.id, current_user.id) %>
+
+
+
+      <% if can_unfriend?(user.id) %>
+
+        <div class="friend-buttons can-unfriend" id="<%= user.id %>">
+          <input type="submit" class="friend" data-id="<%= user.id %>" value="Friend">
+
+          <input type="submit" class="unfriend" data-id="<%= user.id %>" value="Unfriend">
+
+        </div>
+      <% else%>
+
+        <div class="friend-buttons can-friend" id="<%= user.id %>">
+          <input type ="submit" class="friend" data-id="<%= user.id %>" value="Friend">
+
+          <input type="submit" value="Unfriend" class="unfriend" data-id="<%= user.id %>">
+
+        </div>
+      <% end %>
+
+
+  </li>
+  <% end %>
+</ul>
+
+<script type="text/javascript">
+  $(".friend").on("click", function(event) {
+    event.preventDefault();
+    var out_friend_id = $(event.currentTarget).attr("data-id");
+
+
+    $.ajax({
+      type: "POST",
+      url: "/users/"+$(event.currentTarget).attr("data-id")+"/friendship",
+      data: {friendship: {
+         out_friend_id: $(event.currentTarget).attr("data-id")
+       }},
+       success: function(response){
+         // event.currentTarget.remove();
+         $("#" + out_friend_id).toggleClass("can-friend");
+         $("#" + out_friend_id).toggleClass("can-unfriend");
+       }
+     });
+  });
+
+  $(".unfriend").on("click", function(event) {
+    event.preventDefault();
+    var out_friend_id = $(event.currentTarget).attr("data-id");
+    console.log(out_friend_id)
+    $.ajax({
+      type: "DELETE",
+      url: "/friendship/",
+      data: {
+        out_friend_id: $(event.currentTarget).attr("data-id")
+      },
+      success: function(response) {
+        // event.currentTarget.remove();
+        $("#" + out_friend_id).toggleClass("can-friend");
+        $("#" + out_friend_id).toggleClass("can-unfriend");
+      }
+    })
+  });
+</script>
